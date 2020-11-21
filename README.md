@@ -1,5 +1,12 @@
 ## twilioSMS
 
+#### Features
+
+ - Can send a media url along with text message.
+ - Can break text message post 160 characters
+ - Any format of phone number given will be cleaned up
+ - Bulk SMS services using Twilio
+
 #### Usage
 ```
 ➜ python main.py -h
