@@ -84,7 +84,7 @@ def main(argv):
     "message": "",
     "mediaurl":[],
     "filename":""
-}
+    }
     logging.getLogger().setLevel(logging.INFO)
     args = get_args(opts)
     tMsg = TwilioMsg(args.acct_sid, args.acct_token, args.message, args.mediaurl, args.from_number)
@@ -97,7 +97,6 @@ def main(argv):
                 phoneNumberDict[phoneNumber] = tMsg.sendMessage(phoneNumber)
             else:
                 logging.error("found a duplicate - " + phoneNumber)
-
 
 if __name__=='__main__':
     main(sys.argv[1:])
