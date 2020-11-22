@@ -1,11 +1,19 @@
 ## twilioSMS
 
 #### Features
-
+ - You don't have to store/share the data outside of our local.
  - Can send a media url along with text message.
- - Can break text message post 160 characters
- - Any format of phone number given will be cleaned up
- - Bulk SMS services using Twilio
+ - Can break text message post 160 characters.
+ - Any format of phone number given will be cleaned up.
+ - SMS services using Twilio.
+
+#### Pre-Requisites
+ - A Twilio Upgraded account
+ - Money (balance to be used)
+ - Python version >= 3.6.2
+ - pip install twilio, re, getopt, logging
+
+
 
 #### Usage
 ```
@@ -37,4 +45,15 @@ python main.py
   -m <message>
   -u <http or https url>
   -s <Sender channel/phone number>
+```
+
+```
+Example:
+python main.py
+  -f phonenums.csv
+  -a AC12345678901234567890
+  -t ABCD1234EFGH5678IJKL9101112
+  -m "Hi, This is a test message"
+  -u https://myimage123.io/image.gif
+  -s +11234567890
 ```
