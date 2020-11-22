@@ -2,6 +2,10 @@
 import os, sys, getopt, re, logging
 from twilio.rest import Client
 from optparse import OptionParser
+from time import sleep
+from string import Template
+from twilio.base.exceptions import TwilioRestException
+
 
 
 class TwilioMsg:
@@ -23,26 +27,25 @@ class TwilioMsg:
                 phoneStr = "+1" + phoneStr
         return phoneStr
 
-    def checkMessage(self, message):
-        if len(message) >= 155:
-            message = message[0:152] + '...'
+    def checkMessage(self, titleName, message):
+        if len(message) >= 1550:
+            message = message[0:1527] + '...'
         return message
 
-    def sendMessage(self, phoneNumber):
-        message = self.checkMessage(self.msg_body)
-        client = Client(self.account_sid, self.auth_token)
-        if self.media_url:
-            response = client.messages.create(body=message, media_url=self.media_url, from_=self.from_number, to=phoneNumber)
-        else:
-            response = client.messages.create(body=message, from_=self.from_number, to=phoneNumber)
+    def sendMessage(self, title, phoneNumber):
+        try:
+            message = self.checkMessage(title, self.msg_body)
+            client = Client(self.account_sid, self.auth_token)
+            if self.media_url:
+                response = client.messages.create(body=message, media_url=self.media_url, from_=self.from_number, to=phoneNumber)
+            else:
+                response = client.messages.create(body=message, from_=self.from_number, to=phoneNumber)
+            logging.info("Sending message to " + phoneNumber + "..." + response.status)
+            return response.status
+        except TwilioRestException as e:
+            logging.error(e)
 
-        logging.info("Sending message to " + phoneNumber + "..." + response.status)
-
-        if(response.status != 'failed'):
-            return True
-        else:
-            return False
-        return False
+        return "failed"
 
 def get_args(opts):
     """parse the arguments from the commandline"""
@@ -76,6 +79,10 @@ def validate_args(args):
         raise ValueError("sending number is not valid ( +1 followed by at least 10 digits)")
     return args
 
+
+def capitalizeWords(s):
+    return re.sub(r'\w+', lambda m:m.group(0).capitalize(), s)
+
 def main(argv):
     opts = {
     "acct_sid": "",
@@ -89,12 +96,20 @@ def main(argv):
     args = get_args(opts)
     tMsg = TwilioMsg(args.acct_sid, args.acct_token, args.message, args.mediaurl, args.from_number)
     with open(args.filename, 'r') as filename:
-        phoneNumberDict = {}
+
+        PhoneBookDict = {}
         lines = filename.readlines()
         for line in lines:
-            phoneNumber = (tMsg.cleanupPhoneNum(line))
-            if phoneNumber not in phoneNumberDict.keys():
-                phoneNumberDict[phoneNumber] = tMsg.sendMessage(phoneNumber)
+            print(line)
+            titlePlusNumber = line.split(",")
+            if(titlePlusNumber[1]):
+                phoneNumber = (tMsg.cleanupPhoneNum(titlePlusNumber[1]))
+                title = capitalizeWords(titlePlusNumber[0])
+
+                if phoneNumber not in PhoneBookDict.keys():
+                    PhoneBookDict[phoneNumber] = title
+                    status = tMsg.sendMessage(title, phoneNumber)
+                    logging.info(title + " - " + phoneNumber + " : " + str(status))
             else:
                 logging.error("found a duplicate - " + phoneNumber)
 
