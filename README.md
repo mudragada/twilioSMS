@@ -8,7 +8,7 @@
 #### Features
  - You don't have to store/share the data outside of our local.
  - Can send a media url along with text message.
- - Can break text message post 160 characters.
+ - Can break text message post 1600 characters.
  - Any format of phone number given will be cleaned up.
  - SMS services using Twilio.
 
