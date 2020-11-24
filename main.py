@@ -5,9 +5,11 @@ from optparse import OptionParser
 from time import sleep
 from string import Template
 from twilio.base.exceptions import TwilioRestException
+from utils import cleanupPhoneNum as cleanupPhoneNum
+from utils import camelizeWords as camelizeWords
 
-
-
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 class TwilioMsg:
     def __init__(self, account_sid, auth_token, msg_body, media_url, from_number):
         self.account_sid = account_sid
@@ -16,17 +18,6 @@ class TwilioMsg:
         self.media_url = media_url
         self.from_number = from_number
 
-    def cleanupPhoneNum(self, phoneStr):
-        phoneStr = phoneStr.strip()
-        phoneStr = re.sub('[-()/*]','',phoneStr)
-        if(len(phoneStr) == 12):
-            if(phoneStr[0] == '+' and phoneStr[1] == '1'):
-                pass
-        elif(len(phoneStr) == 10):
-            if(phoneStr[0]!='+'):
-                phoneStr = "+1" + phoneStr
-        return phoneStr
-
     def checkMessage(self, titleName, message):
         if len(message) >= 1550:
             message = message[0:1527] + '...'
@@ -34,6 +25,7 @@ class TwilioMsg:
 
     def sendMessage(self, title, phoneNumber):
         try:
+            sleep(2.0)
             message = self.checkMessage(title, self.msg_body)
             client = Client(self.account_sid, self.auth_token)
             if self.media_url:
@@ -80,9 +72,6 @@ def validate_args(args):
     return args
 
 
-def capitalizeWords(s):
-    return re.sub(r'\w+', lambda m:m.group(0).capitalize(), s)
-
 def main(argv):
     opts = {
     "acct_sid": "",
@@ -92,7 +81,7 @@ def main(argv):
     "mediaurl":[],
     "filename":""
     }
-    logging.getLogger().setLevel(logging.INFO)
+
     args = get_args(opts)
     tMsg = TwilioMsg(args.acct_sid, args.acct_token, args.message, args.mediaurl, args.from_number)
     with open(args.filename, 'r') as filename:
@@ -100,12 +89,10 @@ def main(argv):
         PhoneBookDict = {}
         lines = filename.readlines()
         for line in lines:
-            print(line)
             titlePlusNumber = line.split(",")
             if(titlePlusNumber[1]):
-                phoneNumber = (tMsg.cleanupPhoneNum(titlePlusNumber[1]))
-                title = capitalizeWords(titlePlusNumber[0])
-
+                phoneNumber = (cleanupPhoneNum(titlePlusNumber[1]))
+                title = camelizeWords(titlePlusNumber[0])
                 if phoneNumber not in PhoneBookDict.keys():
                     PhoneBookDict[phoneNumber] = title
                     status = tMsg.sendMessage(title, phoneNumber)

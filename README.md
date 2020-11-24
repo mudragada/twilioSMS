@@ -1,5 +1,10 @@
 ## twilioSMS
 
+1. main.py - read from a CSV file and send messages to gateway
+2. resendList.py - useful to compile a resend list with a list of phone numbers from errors.csv. This is useful when we need to hand pick few phone numbers or pick a list of errored out phone numbers.
+3. mergeResponses.py - useful to merge any responses received by SMS gateway into the master list.
+4. utils.py - general util functions for names and phone numbers
+
 #### Features
  - You don't have to store/share the data outside of our local.
  - Can send a media url along with text message.
